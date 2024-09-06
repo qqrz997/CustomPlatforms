@@ -32,7 +32,9 @@ namespace CustomFloorPlugin.Installers
         private void OnPlayerSpawningDidFinish()
         {
             _multiplayerPlayersManager!.playerSpawningDidFinishEvent -= OnPlayerSpawningDidFinish;
-            _platformSpawner.OnTransitionDidFinish(Container.Resolve<MultiplayerLevelScenesTransitionSetupDataSO>(), Container);
+            _platformSpawner.OnTransitionDidFinish(GameScenesManager.SceneTransitionType.None, // not used
+                                                   Container.Resolve<MultiplayerLevelScenesTransitionSetupDataSO>(),
+                                                   Container);
         }
     }
 }

@@ -70,13 +70,13 @@ namespace CustomFloorPlugin
         /// Clean up before switching scenes
         /// </summary>
         // ReSharper disable once AsyncVoidMethod
-        private async void OnTransitionDidStart(float aheadTime) => await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+        private async void OnTransitionDidStart(GameScenesManager.SceneTransitionType transitionType, float aheadTime) => await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
 
         /// <summary>
         /// Decide which platform to change to based on the type of the <see cref="ScenesTransitionSetupDataSO"/>
         /// </summary>
         // ReSharper disable once AsyncVoidMethod
-        internal async void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
+        internal async void OnTransitionDidFinish(GameScenesManager.SceneTransitionType _, ScenesTransitionSetupDataSO? setupData, DiContainer container)
         {
             CustomPlatform platform = setupData switch
             {
