@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 using JetBrains.Annotations;
@@ -19,6 +20,7 @@ namespace CustomFloorPlugin
     {
         private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
+        private readonly ICoroutineStarter _coroutineStarter;
 
         private readonly List<GameObject> _menuEnvironment = new();
         private readonly List<GameObject> _playersPlace = new();
@@ -37,10 +39,13 @@ namespace CustomFloorPlugin
         private Transform? _envRoot;
         private Transform? _menuRoot;
 
-        public EnvironmentHider(AssetLoader assetLoader, PlatformManager platformManager)
+        private CustomPlatform? _currentPlatform;
+
+        public EnvironmentHider(AssetLoader assetLoader, PlatformManager platformManager, ICoroutineStarter coroutineStarter)
         {
             _assetLoader = assetLoader;
             _platformManager = platformManager;
+            _coroutineStarter = coroutineStarter;
         }
 
         internal void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
@@ -71,21 +76,34 @@ namespace CustomFloorPlugin
         /// </summary>
         internal void HideObjectsForPlatform(CustomPlatform platform)
         {
-            if (_menuRoot is null && _envRoot is null) return;
+            _currentPlatform = platform;
+            _coroutineStarter.StartCoroutine(WaitForEnvironment());
+        }
+
+        private IEnumerator WaitForEnvironment()
+        {
+            yield return new WaitUntil(() => _menuRoot || _envRoot);
+            HideObjectsForCurrentPlatform();
+        }
+
+        private void HideObjectsForCurrentPlatform()
+        {
+            if (_currentPlatform == null) return;
+
             FindEnvironment();
-            SetCollectionHidden(_menuEnvironment, platform != _platformManager.DefaultPlatform);
-            SetCollectionHidden(_playersPlace, platform.hideDefaultPlatform);
-            SetCollectionHidden(_smallRings, platform.hideSmallRings);
-            SetCollectionHidden(_bigRings, platform.hideBigRings);
-            SetCollectionHidden(_visualizer, platform.hideEQVisualizer);
-            SetCollectionHidden(_towers, platform.hideTowers);
-            SetCollectionHidden(_highway, platform.hideHighway);
-            SetCollectionHidden(_backColumns, platform.hideBackColumns);
-            SetCollectionHidden(_backLasers, platform.hideBackLasers);
-            SetCollectionHidden(_doubleColorLasers, platform.hideDoubleColorLasers);
-            SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
-            SetCollectionHidden(_trackLights, platform.hideTrackLights);
-            bool showPlayersPlace = _sceneName == "MainMenu" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
+            SetCollectionHidden(_menuEnvironment, _currentPlatform != _platformManager.DefaultPlatform);
+            SetCollectionHidden(_playersPlace, _currentPlatform.hideDefaultPlatform);
+            SetCollectionHidden(_smallRings, _currentPlatform.hideSmallRings);
+            SetCollectionHidden(_bigRings, _currentPlatform.hideBigRings);
+            SetCollectionHidden(_visualizer, _currentPlatform.hideEQVisualizer);
+            SetCollectionHidden(_towers, _currentPlatform.hideTowers);
+            SetCollectionHidden(_highway, _currentPlatform.hideHighway);
+            SetCollectionHidden(_backColumns, _currentPlatform.hideBackColumns);
+            SetCollectionHidden(_backLasers, _currentPlatform.hideBackLasers);
+            SetCollectionHidden(_doubleColorLasers, _currentPlatform.hideDoubleColorLasers);
+            SetCollectionHidden(_rotatingLasers, _currentPlatform.hideRotatingLasers);
+            SetCollectionHidden(_trackLights, _currentPlatform.hideTrackLights);
+            bool showPlayersPlace = _sceneName == "MainMenu" && !_currentPlatform.hideDefaultPlatform && _currentPlatform != _platformManager.DefaultPlatform;
             _assetLoader.PlayersPlace.SetActive(showPlayersPlace);
         }
 
@@ -130,7 +148,7 @@ namespace CustomFloorPlugin
         private void FindAddGameObject(Transform root, string name, ICollection<GameObject> list, bool rename = false)
         {
             GameObject? go = root.Find(name)?.gameObject;
-            if (go is null || (!go.activeSelf && _sceneName != "MainMenu")) return;
+            if (go == null || (!go.activeSelf && _sceneName != "MainMenu")) return;
             if (rename) go.name += "renamed";
             list.Add(go);
         }
@@ -217,7 +235,7 @@ namespace CustomFloorPlugin
                     return;
             }
 
-            if (ringsManager is null) return;
+            if (ringsManager == null) return;
             _smallRings.Add(ringsManager.gameObject);
             _smallRings.AddRange(ringsManager.Rings.Select(static x => x.gameObject));
         }
@@ -251,7 +269,7 @@ namespace CustomFloorPlugin
                     return;
             }
 
-            if (ringsManager is null) return;
+            if (ringsManager == null) return;
             _bigRings.Add(ringsManager.gameObject);
             _bigRings.AddRange(ringsManager.Rings.Select(static x => x.gameObject));
         }
