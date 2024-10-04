@@ -85,7 +85,7 @@ namespace CustomFloorPlugin
             if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
             bool wasActivePlatform = platform == _platformManager.ActivePlatform;
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-            if (!wasActivePlatform || newPlatform is null) return;
+            if (!wasActivePlatform || newPlatform == null) return;
             await _platformSpawner.ChangeToPlatformAsync(newPlatform);
         }
 
@@ -98,7 +98,7 @@ namespace CustomFloorPlugin
             if (!UnityGame.OnMainThread)
                 await UnityGame.SwitchToMainThreadAsync();
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-            if (newPlatform is null) return;
+            if (newPlatform == null) return;
             _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, newPlatform);
         }
 
@@ -200,7 +200,7 @@ namespace CustomFloorPlugin
             await File.WriteAllBytesAsync(path, platData, cancellationToken);
             _fileSystemWatcher.EnableRaisingEvents = true;
             CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
-            if (cancellationToken.IsCancellationRequested || requestedPlatform is null) return;
+            if (cancellationToken.IsCancellationRequested || requestedPlatform == null) return;
             _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, requestedPlatform);
             _platformManager.APIRequestedPlatform = requestedPlatform;
         }

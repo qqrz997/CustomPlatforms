@@ -23,7 +23,7 @@ namespace CustomFloorPlugin.Helpers
 
         internal static void WriteNullableSprite(this BinaryWriter binaryWriter, Sprite? sprite)
         {
-            if (sprite is null)
+            if (sprite == null)
             {
                 binaryWriter.Write(false);
                 return;

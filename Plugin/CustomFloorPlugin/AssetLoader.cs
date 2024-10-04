@@ -167,7 +167,7 @@ namespace CustomFloorPlugin
                 container.Inject(this);
                 gameObject.SetActive(false);
                 List<ILightWithId>?[] lights = _lightWithIdManager._lights;
-                if (_lightSwitchEventEffects is null)
+                if (_lightSwitchEventEffects == null)
                 {
                     Color normalColor = new(1f, 1f, 1f, 0.7490196f);
                     Color boostColor = new(1f, 1f, 1f, 0.8f);
@@ -214,7 +214,7 @@ namespace CustomFloorPlugin
 
             public void PlatformDisabled()
             {
-                if (_lightSwitchEventEffects is null) return;
+                if (_lightSwitchEventEffects == null) return;
                 foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     lse.OnDestroy();
                 gameObject.SetActive(false);

@@ -58,11 +58,11 @@ namespace CustomFloorPlugin
         // ReSharper disable once CognitiveComplexity
         public void PlatformEnabled(DiContainer container)
         {
-            if (trackLaneRingPrefab is null)
+            if (trackLaneRingPrefab == null)
                 return;
             container.Inject(this);
 
-            if (_trackLaneRingsManager is null)
+            if (_trackLaneRingsManager == null)
             {
                 _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 gameObject.SetActive(false);
@@ -80,7 +80,7 @@ namespace CustomFloorPlugin
 
             if (useRotationEffect)
             {
-                if (_trackLaneRingsRotationEffectSpawner is null)
+                if (_trackLaneRingsRotationEffectSpawner == null)
                 {
                     TrackLaneRingsRotationEffect trackLaneRingsRotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
                     trackLaneRingsRotationEffect._trackLaneRingsManager = _trackLaneRingsManager;
@@ -112,7 +112,7 @@ namespace CustomFloorPlugin
 
             if (useStepEffect)
             {
-                if (_trackLaneRingsPositionStepEffectSpawner is null)
+                if (_trackLaneRingsPositionStepEffectSpawner == null)
                 {
                     _trackLaneRingsPositionStepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     _trackLaneRingsPositionStepEffectSpawner.enabled = _beatmapCallbacksController is not null;

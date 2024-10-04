@@ -1,18 +1,12 @@
-﻿using System;
+﻿using CustomFloorPlugin.Helpers;
+using CustomFloorPlugin.Interfaces;
+using JetBrains.Annotations;
+using SiraUtil.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-
-using CustomFloorPlugin.Helpers;
-using CustomFloorPlugin.Interfaces;
-
-using JetBrains.Annotations;
-
-using SiraUtil.Logging;
-
 using UnityEngine;
-
 using Zenject;
-
 
 namespace CustomFloorPlugin
 {
@@ -70,7 +64,8 @@ namespace CustomFloorPlugin
         /// Clean up before switching scenes
         /// </summary>
         // ReSharper disable once AsyncVoidMethod
-        private async void OnTransitionDidStart(GameScenesManager.SceneTransitionType transitionType, float aheadTime) => await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+        private async void OnTransitionDidStart(GameScenesManager.SceneTransitionType transitionType, float aheadTime) => 
+            await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
 
         /// <summary>
         /// Decide which platform to change to based on the type of the <see cref="ScenesTransitionSetupDataSO"/>
@@ -81,7 +76,7 @@ namespace CustomFloorPlugin
             CustomPlatform platform = setupData switch
             {
                 MenuScenesTransitionSetupDataSO or null when _lobbyGameStateModel.gameState == MultiplayerGameState.None => _platformManager.MenuPlatform,
-                StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform is not null => _platformManager.APIRequestedPlatform,
+                StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform != null => _platformManager.APIRequestedPlatform,
                 StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.beatmapKey.beatmapCharacteristic.containsRotationEvents => _platformManager.A360Platform,
                 StandardLevelScenesTransitionSetupDataSO or MissionLevelScenesTransitionSetupDataSO or TutorialScenesTransitionSetupDataSO => _platformManager.SingleplayerPlatform,
                 MultiplayerLevelScenesTransitionSetupDataSO when container.HasBinding<MultiplayerLocalActivePlayerFacade>() => _platformManager.MultiplayerPlatform,
@@ -107,7 +102,7 @@ namespace CustomFloorPlugin
             };
 
             _prevGameState = multiplayerGameState;
-            if (platform is null) return;
+            if (platform == null) return;
             await ChangeToPlatformAsync(platform);
         }
 
@@ -165,7 +160,7 @@ namespace CustomFloorPlugin
         private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
         {
             CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath);
-            if (platform is null)
+            if (platform == null)
                 return _platformManager.DefaultPlatform;
             _platformManager.AllPlatforms.Replace(descriptor, platform);
             UnityEngine.Object.Destroy(descriptor.gameObject);

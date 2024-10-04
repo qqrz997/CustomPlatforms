@@ -35,7 +35,7 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
-            if (_mirror is not null)
+            if (_mirror != null)
                 return;
             container.Inject(this);
             _mirror = gameObject.AddComponent<Mirror>();

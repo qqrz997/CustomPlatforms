@@ -126,7 +126,7 @@ namespace CustomFloorPlugin
                 foreach (Material? sharedMaterial in rendererInfo.Renderer.sharedMaterials.Where(static sm => sm != null))
                 {
                     Shader? commonShader = Shader.Find(sharedMaterial.shader!.name);
-                    if (commonShader is not null)
+                    if (commonShader != null)
                         sharedMaterial.shader = commonShader;
                 }
 

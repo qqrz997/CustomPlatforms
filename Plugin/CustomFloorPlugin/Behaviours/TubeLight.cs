@@ -65,7 +65,7 @@ namespace CustomFloorPlugin
             bool activeSelf = gameObject.activeSelf;
             gameObject.SetActive(false);
 
-            if (_instancedMaterialLightWithId is null && _tubeBloomPrePassLightWithId is null)
+            if (_instancedMaterialLightWithId == null && _tubeBloomPrePassLightWithId == null)
             {
                 Mesh mesh = GetComponent<MeshFilter>().mesh;
                 if (mesh.vertexCount == 0)
@@ -120,7 +120,7 @@ namespace CustomFloorPlugin
                 }
             }
 
-            LightWithIdMonoBehaviour? lightWithIdMonoBehaviour1 = _instancedMaterialLightWithId is not null ? _instancedMaterialLightWithId : _tubeBloomPrePassLightWithId;
+            LightWithIdMonoBehaviour? lightWithIdMonoBehaviour1 = _instancedMaterialLightWithId != null ? _instancedMaterialLightWithId : _tubeBloomPrePassLightWithId;
             lightWithIdMonoBehaviour1!._lightManager = _lightWithIdManager;
             gameObject.SetActive(activeSelf);
         }

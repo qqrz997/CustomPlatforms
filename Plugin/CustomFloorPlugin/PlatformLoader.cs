@@ -60,7 +60,7 @@ namespace CustomFloorPlugin
 
             AssetBundle? assetBundle = await AssetBundleExtensions.LoadFromMemoryAsync(bundleData);
 
-            if (assetBundle is null)
+            if (assetBundle == null)
             {
                 _siraLog.Error($"File could not be loaded:{Environment.NewLine}{fullPath}");
                 return null;
@@ -68,7 +68,7 @@ namespace CustomFloorPlugin
 
             GameObject? platformPrefab = await AssetBundleExtensions.LoadAssetAsync<GameObject>(assetBundle, "_CustomPlatform");
 
-            if (platformPrefab is null)
+            if (platformPrefab == null)
             {
                 assetBundle.Unload(true);
                 _siraLog.Error($"Platform GameObject could not be loaded:{Environment.NewLine}{fullPath}");
@@ -81,11 +81,11 @@ namespace CustomFloorPlugin
 
             CustomPlatform? customPlatform = platformPrefab.GetComponent<CustomPlatform>();
 
-            if (customPlatform is null)
+            if (customPlatform == null)
             {
                 // Check for old platform
                 global::CustomPlatform? legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
-                if (legacyPlatform is not null)
+                if (legacyPlatform != null)
                 {
                     // Replace legacy platform component with up to date one
                     customPlatform = platformPrefab.AddComponent<CustomPlatform>();

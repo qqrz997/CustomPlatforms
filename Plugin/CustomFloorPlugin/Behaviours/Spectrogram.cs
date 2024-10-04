@@ -56,7 +56,7 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
-            if (columnPrefab is null)
+            if (columnPrefab == null)
                 return;
             container.Inject(this);
             if (_columnTransforms is null)
@@ -68,7 +68,7 @@ namespace CustomFloorPlugin
                     notifyEnable?.PlatformEnabled(container);
             }
 
-            enabled = _basicSpectrogramData is not null;
+            enabled = _basicSpectrogramData != null;
         }
 
         public void PlatformDisabled() => UpdateColumnHeights(FallbackSamples);

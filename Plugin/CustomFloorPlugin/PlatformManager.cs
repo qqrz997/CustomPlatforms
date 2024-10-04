@@ -170,7 +170,7 @@ namespace CustomFloorPlugin
                 if (cancellationToken.IsCancellationRequested)
                     return;
                 CustomPlatform? platform = await CreatePlatformAsync(path);
-                if (platform is null)
+                if (platform == null)
                     continue;
                 AllPlatforms.AddSorted(BuildInPlatformsCount, AllPlatforms.Count - BuildInPlatformsCount, platform);
             }
@@ -185,7 +185,7 @@ namespace CustomFloorPlugin
         public async Task<CustomPlatform?> CreatePlatformAsync(string fullPath)
         {
             CustomPlatform? platform = await _platformLoader.LoadPlatformFromFileAsync(fullPath);
-            if (platform is null)
+            if (platform == null)
                 return null;
             CustomPlatform newPlatform = UnityEngine.Object.Instantiate(platform, _anchor);
             UnityEngine.Object.Destroy(platform.gameObject);

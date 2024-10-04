@@ -36,7 +36,7 @@ namespace CustomFloorPlugin
             if (_beatmapCallbacksController is null)
                 return;
             _startRot = transform.rotation;
-            if (_lightRotationEventEffect is null)
+            if (_lightRotationEventEffect == null)
             {
                 _lightRotationEventEffect = gameObject.AddComponent<LightRotationEventEffect>();
                 _lightRotationEventEffect._event = (BasicBeatmapEventType)eventType;
@@ -54,7 +54,7 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_lightRotationEventEffect is null)
+            if (_lightRotationEventEffect == null)
                 return;
             transform.rotation = _startRot;
             _lightRotationEventEffect.enabled = false;
