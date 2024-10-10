@@ -1,37 +1,23 @@
-## Installation
-### Easy Method
+> [!NOTE]
+> Some platforms have shaders that are compiled for the old unity version used prior to Beat Saber 1.29.4, and may not render properly at all. However, a wide range of platforms are still completely functional and it is up to their creators to update the shaders they used if their models are broken.
 
-* Ensure you have the latest verion of [BeatSaberModManager](https://github.com/affederaffe/BeatSaberModManager/releases) or [ModAssistant](https://github.com/Assistant/ModAssistant/releases)
-* Launch the mod installer
-* Select the checkbox for Custom Platforms
-* Click Install
-### Manual Method
+To read more about migrating platforms to the newer versions of Beat Saber, read [this wiki page](https://bsmg.wiki/models/shader-migration.html).
 
-* Ensure your game is patched with BSIPA (ModAssistant does this for you)
-* Place the CustomPlatforms.dll in your Beat Saber\Plugins directory
+# Custom Platforms
+This is a fork of the Custom Platforms plugin for Beat Saber with the plan of continued maintenance as the game recieves updates.
 
-After a relaunch, your Beat Saber folder should look like this:
+## Manual Installation
+> [!IMPORTANT]
+> In addition to BSIPA, you must have [AssetBundleLoadingTools](https://github.com/nicoco007/AssetBundleLoadingTools), [SiraUtil](https://github.com/Auros/SiraUtil), and [BeatSaberMarkupLanguage](https://github.com/monkeymanboy/BeatSaberMarkupLanguage) installed for this mod to load. Install them using your mod manager i.e. [BSManager](https://bsmg.wiki/pc-modding.html#bsmanager).
 
-```
-| Beat Saber
-  | Plugins
-    | CustomPlatforms.dll             <-- 
-  | CustomPlatforms		      <--
-    | <.plat files>		      <--
-  | IPA
-  | Beat Saber.exe
-  | (other files and folders)
-```
+Place the contents of the unzipped folder from the latest [release](https://github.com/qqrz997/CustomSabersLite/releases/latest) into your Beat Saber installation folder. If you need more information regarding manual installation of mods [this wiki page](https://bsmg.wiki/pc-modding.html#manual-installation) will help. For further help with installing mods, join the [Beat Saber Modding Group](https://discord.gg/beatsabermods) discord server.
 
-## Controls
+Older versions of CustomPlatforms are not supported. If you find issues using an older version then I won't be able to help.
 
-Visit the Platforms Menu page ingame to change your platform for different gamemodes
+- After launching Beat Saber with the mod successfully installed, a `CustomPlatforms` folder will be created in your Beat Saber game folder. Plat files should be placed here.
+- You can get more platforms from a model downloader such as [ModelMenu](https://github.com/qqrz997/ModelMenu) or BSManager, or you can visit [ModelSaber](https://modelsaber.com/Platforms/?pc) which supports One-Click installs.
 
-## Adding More Platforms
-
-Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder.
-Your installed platforms will be available after a few seconds.
-A possible source for platforms is [ModelSaber](https://modelsaber.com/Platforms/?pc).
+After importing platforms, restart the game and you will see them in the Custom Platforms menu, accessed through a button in the mods section of the main menu.
 
 ## Creating New Platforms
 
@@ -55,8 +41,8 @@ In the inspector, click "Export". Navigate to your CustomPlatforms folder, and p
 
 6. Share your custom platform with other players by uploading the Platforms' .plat file
 
-## Building
-1. Clone the repository with ```git clone https://github.com/affederaffe/CustomPlatforms.git```
+## Building (Outdated but still functional)
+1. Clone the repository with ```git clone https://github.com/qqrz997/CustomPlatforms.git```
 2. Go to the ```./CustomPlatforms/Plugin/CustomFloorPlugin``` direcory and create a ```CustomFloorPlugin.csproj.user``` file, see the example below
 3. Open the solution file in the ```Plugins``` directory with e.g. VisualStudio or Jetbrains Rider and build the project
 
