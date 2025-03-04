@@ -10,6 +10,7 @@ using IPA.Logging;
 using JetBrains.Annotations;
 
 using SiraUtil.Zenject;
+using static SiraUtil.Zenject.Location;
 
 
 namespace CustomFloorPlugin;
@@ -35,10 +36,10 @@ public class Plugin
     {
         zenjector.UseLogger(logger);
         zenjector.UseHttpService();
-        zenjector.Install<AppInstaller>(Location.App, pluginMetadata.Assembly, config.Generated<PluginConfig>());
-        zenjector.Install<MenuInstaller>(Location.Menu);
-        zenjector.Install<PlayerInstaller>(Location.Player);
-        zenjector.Install<StandardPlayerInstaller>(Location.StandardPlayer);
-        zenjector.Install<MultiPlayerInstaller>(Location.MultiPlayer);
+        zenjector.Install<AppInstaller>(App, pluginMetadata.Assembly, config.Generated<PluginConfig>());
+        zenjector.Install<MenuInstaller>(Menu);
+        zenjector.Install<PlayerInstaller>(Player); 
+        zenjector.Install<SoloStandardInstaller>(StandardPlayer | CampaignPlayer);
+        zenjector.Install<MultiPlayerInstaller>(MultiPlayer);
     }
 }

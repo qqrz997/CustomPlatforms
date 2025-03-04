@@ -3,7 +3,7 @@ using Zenject;
 
 namespace CustomFloorPlugin.Installers;
 
-internal class StandardPlayerInstaller : Installer
+internal class SoloStandardInstaller : Installer
 {
     public override void InstallBindings()
     {
