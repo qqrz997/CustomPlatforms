@@ -6,56 +6,51 @@ using System.Threading;
 using System.Threading.Tasks;
 using CustomFloorPlugin.Helpers;
 using IPA.Loader;
-using IPA.Utilities;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using SiraUtil.Logging;
 using SiraUtil.Web;
 using Zenject;
 
 namespace CustomFloorPlugin.PlatformManagement;
 
 /// <summary>
-/// A class that handles all interaction with outside plugins, at the moment just SongCore and Cinema<br/>
-/// Also detects changes in the directory and reflects them in-game, e.g. loading, updating or removing platforms
+/// Responsible for downloading platforms from custom levels that require a custom platform, and disabling custom
+/// platforms on levels that require Cinema.
 /// </summary>
-[UsedImplicitly]
 internal class ConnectionManager : IInitializable, IDisposable
 {
+    private readonly SiraLog _siraLog;
     private readonly IHttpService _httpService;
     private readonly PlatformManager _platformManager;
 
-    private readonly FileSystemWatcher _fileSystemWatcher;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly bool _isSongCoreInstalled;
     private readonly bool _isCinemaInstalled;
 
-    public ConnectionManager(IHttpService httpService, PlatformManager platformManager)
+    public ConnectionManager(SiraLog siraLog, IHttpService httpService, PlatformManager platformManager)
     {
+        _siraLog = siraLog;
         _httpService = httpService;
         _platformManager = platformManager;
-        _fileSystemWatcher = new(_platformManager.DirectoryPath, "*.plat");
         _isSongCoreInstalled = PluginManager.GetPlugin("SongCore") is not null;
         _isCinemaInstalled = PluginManager.GetPlugin("Cinema") is not null;
     }
 
     public void Initialize()
     {
-        // _fileSystemWatcher.Changed += OnFileChanged;
-        _fileSystemWatcher.Created += OnFileCreated;
-        _fileSystemWatcher.Deleted += OnFileDeleted;
-        _fileSystemWatcher.EnableRaisingEvents = true;
         if (_isCinemaInstalled)
+        {
             InitializeCinemaConnection();
+        }
         if (_isSongCoreInstalled)
+        {
             InitializeSongCoreConnection();
+        }
     }
 
     public void Dispose()
     {
-        // _fileSystemWatcher.Changed -= OnFileChanged;
-        _fileSystemWatcher.Created -= OnFileCreated;
-        _fileSystemWatcher.Deleted -= OnFileDeleted;
-        _fileSystemWatcher.Dispose();
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
         if (_isCinemaInstalled)
@@ -64,56 +59,13 @@ internal class ConnectionManager : IInitializable, IDisposable
             DisposeSongCoreConnection();
     }
 
-    // TODO: this feature is disabled due to being directly related to the menu scene
-    // TODO: this and the events below should probably belong in their own place
-    // private async void OnFileChanged(object sender, FileSystemEventArgs e)
-    // {
-    //     if (!UnityGame.OnMainThread)
-    //         await UnityGame.SwitchToMainThreadAsync();
-    //     if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
-    //     bool wasActivePlatform = platform == _platformManager.ActivePlatform;
-    //     CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-    //     if (!wasActivePlatform || newPlatform == null) return;
-    //     await _platformSpawner.ChangeToPlatformAsync(newPlatform);
-    // }
-
-    /// <summary>
-    /// Create the new platform and add it to the UI
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    private async void OnFileCreated(object sender, FileSystemEventArgs e)
-    {
-        if (!UnityGame.OnMainThread)
-            await UnityGame.SwitchToMainThreadAsync();
-        var  newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-        if (newPlatform == null) return;
-        _platformManager.AllPlatforms.AddSorted(
-            PlatformManager.BuildInPlatformsCount,
-            _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount,
-            newPlatform);
-    }
-
-    /// <summary>
-    /// Destroy the platform and remove all references
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    private async void OnFileDeleted(object sender, FileSystemEventArgs e)
-    {
-        if (!UnityGame.OnMainThread)
-            await UnityGame.SwitchToMainThreadAsync();
-        if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
-        // todo: investigate this functionality
-        // if (platform == _platformManager.ActivePlatform) await _menuPlatformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
-        _platformManager.AllPlatforms.Remove(platform);
-        UnityEngine.Object.Destroy(platform.gameObject);
-    }
-
+    // IMPORTANT !!!
+    // Make sure to check SongCore and Cinema respectively are installed before calling the following methods
     private void InitializeSongCoreConnection()
     {
         SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
         SongCore.Collections.RegisterCapability("Custom Platforms");
     }
-
     private void DisposeSongCoreConnection()
     {
         SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
@@ -121,26 +73,16 @@ internal class ConnectionManager : IInitializable, IDisposable
     }
 
     private void InitializeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
-
     private void DisposeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
 
-    /// <summary>
-    /// Disable platform spawning as required by Cinema
-    /// </summary>
     private void OnCinemaEvent(bool allowPlatform)
     {
         if (!allowPlatform)
+        {
+            // Setting this will make the platform spawner use the default platform
+            _siraLog.Debug("Setting platform to default for Cinema.");
             _platformManager.APIRequestedPlatform = _platformManager.DefaultPlatform;
-    }
-
-    /// <summary>
-    /// The class the API response of modelsaber is deserialized on
-    /// </summary>
-    [Serializable]
-    public class PlatformDownloadData
-    {
-        public string? name;
-        public string? download;
+        }
     }
 
     /// <summary>
@@ -174,26 +116,55 @@ internal class ConnectionManager : IInitializable, IDisposable
         await DownloadPlatform(url, _cancellationTokenSource.Token);
     }
 
-    /// <summary>
-    /// Asynchronously downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
-    /// </summary>
     private async Task DownloadPlatform(string url, CancellationToken cancellationToken)
     {
-        IHttpResponse downloadDataWebResponse = await _httpService.GetAsync(url, null, cancellationToken);
-        if (!downloadDataWebResponse.Successful) return;
-        string json = await downloadDataWebResponse.ReadAsStringAsync();
-        PlatformDownloadData? platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json)?.FirstOrDefault().Value;
-        if (platformDownloadData?.download is null) return;
-        IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download, null, cancellationToken);
-        if (!platDownloadWebResponse.Successful) return;
-        byte[] platData = await platDownloadWebResponse.ReadAsByteArrayAsync();
+        var httpResponse = await _httpService.GetAsync(url, null, cancellationToken);
+        if (!httpResponse.Successful)
+        {
+            return;
+        }
+
+        string json = await httpResponse.ReadAsStringAsync();
+        
+        var platformDownloadData = JsonConvert
+            .DeserializeObject<Dictionary<string, PlatformDownloadData>>(json)?
+            .FirstOrDefault().Value;
+        if (platformDownloadData?.download is null)
+        {
+            return;
+        }
+
+        var platformHttpResponse = await _httpService.GetAsync(platformDownloadData.download, null, cancellationToken);
+        if (!platformHttpResponse.Successful)
+        {
+            return;
+        }
+
+        byte[] platData = await platformHttpResponse.ReadAsByteArrayAsync();
         string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
-        _fileSystemWatcher.EnableRaisingEvents = false;
         await File.WriteAllBytesAsync(path, platData, cancellationToken);
-        _fileSystemWatcher.EnableRaisingEvents = true;
-        CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
-        if (cancellationToken.IsCancellationRequested || requestedPlatform == null) return;
-        _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, requestedPlatform);
-        _platformManager.APIRequestedPlatform = requestedPlatform;
+        
+        var newPlatform = await _platformManager.CreatePlatformAsync(path);
+        if (cancellationToken.IsCancellationRequested || newPlatform == null)
+        {
+            return;
+        }
+
+        _siraLog.Debug($"New platform downloaded from SongCore: {newPlatform.platName}");
+        _platformManager.APIRequestedPlatform = newPlatform;
+        _platformManager.AllPlatforms.AddSorted(
+            PlatformManager.BuildInPlatformsCount,
+            _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount,
+            newPlatform);
     }
+}
+
+/// <summary>
+/// The class the API response of ModelSaber is deserialized on
+/// </summary>
+[Serializable]
+file class PlatformDownloadData
+{
+    public string? name;
+    public string? download;
 }

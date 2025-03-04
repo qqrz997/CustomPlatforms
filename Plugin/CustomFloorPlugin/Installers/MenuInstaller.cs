@@ -18,7 +18,9 @@ internal class MenuInstaller : Installer
         Container.BindInterfacesTo<MenuEnvironmentHider>().AsSingle();
             
         Container.BindInterfacesTo<LobbyPlatformController>().AsSingle();
-            
+
+        Container.BindInterfacesTo<PlatformFileUpdater>().AsSingle();
+        
         Container.Bind<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
         Container.Bind<PlatformsFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
         Container.BindInterfacesTo<MenuButtonManager>().AsSingle();

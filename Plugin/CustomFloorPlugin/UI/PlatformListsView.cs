@@ -79,8 +79,8 @@ internal class PlatformListsView : BSMLAutomaticViewController
         base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         if (firstActivation)
             _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
-        CustomPlatform platform = GetPlatformForTabIndex(_tabIndex);
-        await _platformSpawner.SpawnPlatform(platform);
+        RefreshListViews();
+        await _platformSpawner.SpawnPlatform(GetPlatformForTabIndex(_tabIndex));
     }
 
     /// <summary>
@@ -123,18 +123,17 @@ internal class PlatformListsView : BSMLAutomaticViewController
     /// </summary>
     private void OnCollectionDidChange(object sender, NotifyCollectionChangedEventArgs e)
     {
-        switch (e.Action)
+        if (e.Action == NotifyCollectionChangedAction.Add)
         {
-            case NotifyCollectionChangedAction.Add:
-                foreach (CustomPlatform platform in e.NewItems)
-                    AddCellForPlatform(platform, e.NewStartingIndex);
-                RefreshListViews();
-                break;
-            case NotifyCollectionChangedAction.Remove:
-                foreach (CustomPlatform platform in e.OldItems)
-                    RemoveCellForPlatform(platform, e.OldStartingIndex);
-                RefreshListViews();
-                break;
+            foreach (CustomPlatform platform in e.NewItems)
+                AddCellForPlatform(platform, e.NewStartingIndex);
+            RefreshListViews();
+        }
+        else if (e.Action == NotifyCollectionChangedAction.Remove)
+        {
+            foreach (CustomPlatform platform in e.OldItems)
+                RemoveCellForPlatform(platform, e.OldStartingIndex);
+            RefreshListViews();
         }
     }
 
