@@ -1,4 +1,4 @@
-﻿using CustomFloorPlugin.Interfaces;
+﻿using CustomFloorPlugin.Models;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,37 +6,36 @@ using Zenject;
 
 
 // ReSharper disable once CheckNamespace
-namespace CustomFloorPlugin
+namespace CustomFloorPlugin;
+
+public class ComboReachedEvent : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
 {
-    public class ComboReachedEvent : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
+    // ReSharper disable InconsistentNaming
+    public int ComboTarget = 50;
+    public UnityEvent? NthComboReached;
+    // ReSharper restore InconsistentNaming
+
+    private BSEvents? _events;
+
+    [Inject]
+    public void Construct([InjectOptional] BSEvents events) => _events = events;
+
+    public void PlatformEnabled(DiContainer container)
     {
-        // ReSharper disable InconsistentNaming
-        public int ComboTarget = 50;
-        public UnityEvent? NthComboReached;
-        // ReSharper restore InconsistentNaming
+        container.Inject(this);
+        if (_events is not null)
+            _events.ComboDidChangeEvent += OnComboReached;
+    }
 
-        private BSEvents? _events;
+    public void PlatformDisabled()
+    {
+        if (_events is not null)
+            _events.ComboDidChangeEvent -= OnComboReached;
+    }
 
-        [Inject]
-        public void Construct([InjectOptional] BSEvents events) => _events = events;
-
-        public void PlatformEnabled(DiContainer container)
-        {
-            container.Inject(this);
-            if (_events is not null)
-                _events.ComboDidChangeEvent += OnComboReached;
-        }
-
-        public void PlatformDisabled()
-        {
-            if (_events is not null)
-                _events.ComboDidChangeEvent -= OnComboReached;
-        }
-
-        private void OnComboReached(int combo)
-        {
-            if (combo == ComboTarget)
-                NthComboReached!.Invoke();
-        }
+    private void OnComboReached(int combo)
+    {
+        if (combo == ComboTarget)
+            NthComboReached!.Invoke();
     }
 }

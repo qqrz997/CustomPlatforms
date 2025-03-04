@@ -1,49 +1,47 @@
-using CustomFloorPlugin.Interfaces;
-
+using CustomFloorPlugin.Models;
 using UnityEngine;
 
 using Zenject;
 
 
 // ReSharper disable once CheckNamespace
-namespace CustomFloorPlugin
+namespace CustomFloorPlugin;
+
+[RequireComponent(typeof(Renderer))]
+public class SpectrogramMaterial : MonoBehaviour, INotifyPlatformEnabled
 {
-    [RequireComponent(typeof(Renderer))]
-    public class SpectrogramMaterial : MonoBehaviour, INotifyPlatformEnabled
+    // ReSharper disable InconsistentNaming
+    [Header("The Array property (uniform float arrayName[64])")]
+    public string? PropertyName;
+    [Header("The global intensity (float valueName)")]
+    public string? AveragePropertyName;
+    // ReSharper restore InconsistentNaming
+
+    private BasicSpectrogramData? _basicSpectrogramData;
+
+    private Renderer Renderer => _renderer ??= GetComponent<Renderer>();
+    private Renderer? _renderer;
+
+    [Inject]
+    public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData) => _basicSpectrogramData = basicSpectrogramData;
+
+    public void PlatformEnabled(DiContainer container)
     {
-        // ReSharper disable InconsistentNaming
-        [Header("The Array property (uniform float arrayName[64])")]
-        public string? PropertyName;
-        [Header("The global intensity (float valueName)")]
-        public string? AveragePropertyName;
-        // ReSharper restore InconsistentNaming
+        container.Inject(this);
+        enabled = _basicSpectrogramData != null;
+    }
 
-        private BasicSpectrogramData? _basicSpectrogramData;
+    public void Update()
+    {
+        float average = 0f;
+        for (int i = 0; i < 64; i++)
+            average += _basicSpectrogramData!.ProcessedSamples[i];
+        average /= 64.0f;
 
-        private Renderer Renderer => _renderer ??= GetComponent<Renderer>();
-        private Renderer? _renderer;
-
-        [Inject]
-        public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData) => _basicSpectrogramData = basicSpectrogramData;
-
-        public void PlatformEnabled(DiContainer container)
+        foreach (Material mat in Renderer.materials)
         {
-            container.Inject(this);
-            enabled = _basicSpectrogramData != null;
-        }
-
-        public void Update()
-        {
-            float average = 0f;
-            for (int i = 0; i < 64; i++)
-                average += _basicSpectrogramData!.ProcessedSamples[i];
-            average /= 64.0f;
-
-            foreach (Material mat in Renderer.materials)
-            {
-                mat.SetFloatArray(PropertyName, _basicSpectrogramData!.ProcessedSamples);
-                mat.SetFloat(AveragePropertyName, average);
-            }
+            mat.SetFloatArray(PropertyName, _basicSpectrogramData!.ProcessedSamples);
+            mat.SetFloat(AveragePropertyName, average);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+namespace CustomFloorPlugin.Legacy_Behaviours;
 
 /// <summary>
 /// Legacy Platform.
