@@ -9,15 +9,18 @@ public sealed class MultiplayerEnvironmentHider : IEnvironmentHider
 {
     private readonly IEnvironmentObjectSource _environmentObjectSource;
     private readonly GameplayCoreSceneSetupData _gameplayCoreSceneSetupData;
+    private readonly AssetLoader _assetLoader;
     private readonly SiraLog _siraLog;
 
     public MultiplayerEnvironmentHider(
         IEnvironmentObjectSource environmentObjectSource,
         GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
+        AssetLoader assetLoader,
         SiraLog siraLog)
     {
         _environmentObjectSource = environmentObjectSource;
         _gameplayCoreSceneSetupData = gameplayCoreSceneSetupData;
+        _assetLoader = assetLoader;
         _siraLog = siraLog;
     }
 
@@ -39,5 +42,7 @@ public sealed class MultiplayerEnvironmentHider : IEnvironmentHider
         _environmentObjectSource.DoubleColorLasers.SetActive(!customPlatform.hideDoubleColorLasers);
         _environmentObjectSource.RotatingLasers.SetActive(!customPlatform.hideRotatingLasers);
         _environmentObjectSource.TrackLights.SetActive(!customPlatform.hideTrackLights);
+        
+        _assetLoader.PlayersPlace.SetActive(false);
     }
 }

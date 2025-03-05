@@ -9,5 +9,5 @@ public interface IPlatformSpawner
     /// </summary>
     /// <param name="customPlatform">The CustomPlatform to replace the current one with</param>
     /// <returns>A task representing the async operation</returns>
-    Task<CustomPlatform> SpawnPlatform(CustomPlatform customPlatform);
+    Task SpawnPlatform(CustomPlatform customPlatform);
 }

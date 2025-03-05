@@ -22,12 +22,12 @@ public sealed class MenuPlatformSpawner : IPlatformSpawner, IInitializable
 
     public async void Initialize()
     {
-        var spawnedPlatform = await SpawnPlatform(_platformManager.MenuPlatform);
-        await _environmentHider.HideObjectsForPlatform(spawnedPlatform);
+        await SpawnPlatform(_platformManager.MenuPlatform);
     }
 
-    public async Task<CustomPlatform> SpawnPlatform(CustomPlatform platform)
+    public async Task SpawnPlatform(CustomPlatform platform)
     {
-        return await _platformManager.SpawnPlatform(platform, _container);
+        var spawnedPlatform = await _platformManager.SpawnPlatform(platform, _container);
+        await _environmentHider.HideObjectsForPlatform(spawnedPlatform);
     }
 }

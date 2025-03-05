@@ -31,8 +31,7 @@ public sealed class StandardGameplayPlatformSpawner : IPlatformSpawner, IInitial
             : _scenesTransitionSetupData.HasRotationEvents() ? _platformManager.A360Platform
             : _platformManager.SingleplayerPlatform;
         
-        var spawnedPlatform = await SpawnPlatform(currentPlatform);
-        await _environmentHider.HideObjectsForPlatform(spawnedPlatform);
+        await SpawnPlatform(currentPlatform);
     }
 
     public async void Dispose()
@@ -41,8 +40,9 @@ public sealed class StandardGameplayPlatformSpawner : IPlatformSpawner, IInitial
         await SpawnPlatform(_platformManager.MenuPlatform);
     }
 
-    public async Task<CustomPlatform> SpawnPlatform(CustomPlatform customPlatform)
+    public async Task SpawnPlatform(CustomPlatform customPlatform)
     {
-        return await _platformManager.SpawnPlatform(customPlatform, _container);
+        var spawnedPlatform = await _platformManager.SpawnPlatform(customPlatform, _container);
+        await _environmentHider.HideObjectsForPlatform(spawnedPlatform);
     }
 }

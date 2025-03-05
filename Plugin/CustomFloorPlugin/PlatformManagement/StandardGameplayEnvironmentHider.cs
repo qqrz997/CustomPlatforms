@@ -9,16 +9,19 @@ public sealed class StandardGameplayEnvironmentHider : IEnvironmentHider
 {
     private readonly IEnvironmentObjectSource _environmentObjectSource;
     private readonly GameplayCoreSceneSetupData _gameplayCoreSceneSetupData;
+    private readonly AssetLoader _assetLoader;
     private readonly SiraLog _siraLog;
 
     public StandardGameplayEnvironmentHider(
         IEnvironmentObjectSource environmentObjectSource,
         GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
+        AssetLoader assetLoader,
         SiraLog siraLog)
     {
         _environmentObjectSource = environmentObjectSource;
         _gameplayCoreSceneSetupData = gameplayCoreSceneSetupData;
         _siraLog = siraLog;
+        _assetLoader = assetLoader;
     }
 
     public async Task HideObjectsForPlatform(CustomPlatform customPlatform)
@@ -39,5 +42,7 @@ public sealed class StandardGameplayEnvironmentHider : IEnvironmentHider
         _environmentObjectSource.DoubleColorLasers.SetActive(!customPlatform.hideDoubleColorLasers);
         _environmentObjectSource.RotatingLasers.SetActive(!customPlatform.hideRotatingLasers);
         _environmentObjectSource.TrackLights.SetActive(!customPlatform.hideTrackLights);
+        
+        _assetLoader.PlayersPlace.SetActive(false);
     }
 }

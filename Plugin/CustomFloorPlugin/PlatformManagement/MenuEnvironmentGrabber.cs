@@ -5,7 +5,6 @@ using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Models;
 using SiraUtil.Logging;
 using UnityEngine;
-using Zenject;
 
 namespace CustomFloorPlugin.PlatformManagement;
 
@@ -43,9 +42,9 @@ public sealed class MenuEnvironmentGrabber : IEnvironmentObjectSource
 
     public async Task Initialize()
     {
-        await Task.CompletedTask;
-        
         FindMenuEnvironmentObjects();
+        
+        await Task.CompletedTask;
     }
 
     private void FindMenuEnvironmentObjects()

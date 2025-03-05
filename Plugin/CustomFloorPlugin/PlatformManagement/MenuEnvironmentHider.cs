@@ -8,21 +8,26 @@ public sealed class MenuEnvironmentHider : IEnvironmentHider
 {
     private readonly PlatformManager _platformManager;
     private readonly IEnvironmentObjectSource _environmentObjectSource;
+    private readonly AssetLoader _assetLoader;
 
     public MenuEnvironmentHider(
         PlatformManager platformManager,
-        IEnvironmentObjectSource environmentObjectSource)
+        IEnvironmentObjectSource environmentObjectSource,
+        AssetLoader assetLoader)
     {
         _platformManager = platformManager;
         _environmentObjectSource = environmentObjectSource;
+        _assetLoader = assetLoader;
     }
 
     public async Task HideObjectsForPlatform(CustomPlatform platform)
     {
         await _environmentObjectSource.InitializationTask;
         
-        _environmentObjectSource.AlwaysHide.SetActive(platform == _platformManager.DefaultPlatform);
-        // bool showPlayersPlace = _envName == "MainMenu" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
-        // _assetLoader.PlayersPlace.SetActive(showPlayersPlace);
+        // Show the environment only when there is no custom platform
+        bool isCustomPlatform = _platformManager.DefaultPlatform != platform;
+        _environmentObjectSource.AlwaysHide.SetActive(!isCustomPlatform);
+        
+        _assetLoader.PlayersPlace.SetActive(isCustomPlatform && !platform.hideDefaultPlatform);
     }
 }

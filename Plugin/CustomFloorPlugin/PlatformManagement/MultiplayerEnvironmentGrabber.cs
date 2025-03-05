@@ -37,10 +37,10 @@ public sealed class MultiplayerEnvironmentGrabber : IEnvironmentObjectSource
 
     public async Task Initialize()
     {
-        await Task.CompletedTask;
-        
         FindPlayersPlace();
         FindHighway();
+        
+        await Task.CompletedTask;
     }
 
     private void FindPlayersPlace()

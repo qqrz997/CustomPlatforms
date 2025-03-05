@@ -23,11 +23,11 @@ public sealed class MultiplayerPlatformSpawner : IPlatformSpawner, IInitializabl
     public async void Initialize()
     {
         await SpawnPlatform(_platformManager.MultiplayerPlatform);
-        await _environmentHider.HideObjectsForPlatform(_platformManager.MultiplayerPlatform);
     }
 
-    public async Task<CustomPlatform> SpawnPlatform(CustomPlatform customPlatform)
+    public async Task SpawnPlatform(CustomPlatform customPlatform)
     {
-        return await _platformManager.SpawnPlatform(customPlatform, _container);
+        var spawnedPlatform = await _platformManager.SpawnPlatform(customPlatform, _container);
+        await _environmentHider.HideObjectsForPlatform(spawnedPlatform);
     }
 }

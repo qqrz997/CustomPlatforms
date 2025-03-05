@@ -20,6 +20,6 @@ internal static class UnityExtensions
 
     public static void SetActive(this IEnumerable<GameObject> gameObjects, bool active)
     {
-        foreach (var gameObject in gameObjects) gameObject.SetActive(active);
+        foreach (var gameObject in gameObjects) if (gameObject) gameObject.SetActive(active);
     }
 }
