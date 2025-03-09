@@ -7,9 +7,10 @@
         <PluginId>CustomPlatforms</PluginId>
         <PluginName>Custom Platforms</PluginName>
         <Authors>Rolo</Authors>
-        <Version>6.2.1</Version>
+        <Version>6.2.2</Version>
         <GameVersion>1.40.3</GameVersion>
         <Description>A plugin to support custom platforms and environments</Description>
+        <PluginHint>CustomFloorPlugin.Plugin</PluginHint>
         <!--<PluginIcon></PluginIcon>-->
         <!--<ProjectSource></ProjectSource>-->
         <!--<ProjectHome></ProjectHome>-->
