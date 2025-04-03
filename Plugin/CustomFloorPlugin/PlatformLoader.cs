@@ -84,24 +84,22 @@ public class PlatformLoader
         if (customPlatform == null)
         {
             // Check for old platform
-            global::CustomFloorPlugin.Legacy_Behaviours.CustomPlatform? legacyPlatform = platformPrefab.GetComponent<global::CustomFloorPlugin.Legacy_Behaviours.CustomPlatform>();
-            if (legacyPlatform != null)
-            {
-                // Replace legacy platform component with up to date one
-                customPlatform = platformPrefab.AddComponent<CustomPlatform>();
-                customPlatform.platName = legacyPlatform.platName;
-                customPlatform.platAuthor = legacyPlatform.platAuthor;
-                customPlatform.hideDefaultPlatform = true;
-                // Remove old platform data
-                UnityEngine.Object.Destroy(legacyPlatform);
-            }
-            else
+            var legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
+            if (legacyPlatform == null)
             {
                 // No CustomPlatform component, abort
                 UnityEngine.Object.Destroy(platformPrefab);
                 _siraLog.Error($"AssetBundle does not contain a CustomPlatform:{Environment.NewLine}{fullPath}");
                 return null;
             }
+
+            // Replace legacy platform component with up to date one
+            customPlatform = platformPrefab.AddComponent<CustomPlatform>();
+            customPlatform.platName = legacyPlatform.platName;
+            customPlatform.platAuthor = legacyPlatform.platAuthor;
+            customPlatform.hideDefaultPlatform = true;
+            // Remove old platform data
+            UnityEngine.Object.Destroy(legacyPlatform);
         }
 
         Camera[] cameras = platformPrefab.GetComponentsInChildren<Camera>(true);
