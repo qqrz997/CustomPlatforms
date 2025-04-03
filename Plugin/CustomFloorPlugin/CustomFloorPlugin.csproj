@@ -15,7 +15,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
-    <AssemblyName>CustomPlatforms</AssemblyName>
+    <RootNamespace>CustomFloorPlugin</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
