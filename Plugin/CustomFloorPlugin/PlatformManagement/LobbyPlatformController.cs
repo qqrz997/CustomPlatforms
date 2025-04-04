@@ -1,5 +1,6 @@
 using System;
 using CustomFloorPlugin.Models;
+using SiraUtil.Affinity;
 using Zenject;
 
 namespace CustomFloorPlugin.PlatformManagement;
@@ -8,7 +9,7 @@ namespace CustomFloorPlugin.PlatformManagement;
 /// Responsible for swapping out the current menu custom platform when joining a lobby, as we do not want to use a
 /// custom platform in a multiplayer lobby.
 /// </summary>
-public sealed class LobbyPlatformController : IInitializable, IDisposable
+internal sealed class LobbyPlatformController : IAffinity, IInitializable, IDisposable
 {
     private readonly GameServerLobbyFlowCoordinator _lobbyFlowCoordinator;
     private readonly PlatformManager _platformManager;
@@ -26,17 +27,16 @@ public sealed class LobbyPlatformController : IInitializable, IDisposable
 
     public void Initialize()
     {
-        _lobbyFlowCoordinator.didSetupEvent += LobbyFlowCoordinatorDidSetup;
         _lobbyFlowCoordinator.didFinishEvent += LobbyFlowCoordinatorDidFinish;
     }
 
     public void Dispose()
     {
-        _lobbyFlowCoordinator.didSetupEvent -= LobbyFlowCoordinatorDidSetup;
         _lobbyFlowCoordinator.didFinishEvent -= LobbyFlowCoordinatorDidFinish;
     }
 
-    private void LobbyFlowCoordinatorDidSetup()
+    [AffinityPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
+    public void ActivateMultiplayerLobbyPostfix()
     {
         _platformSpawner.SpawnPlatform(_platformManager.DefaultPlatform);
     }
