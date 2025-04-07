@@ -48,6 +48,5 @@ internal class AppInstaller : Installer
         
         Container.BindInterfacesAndSelfTo<PlatformManager>().AsSingle();
         Container.BindInterfacesTo<ConnectionManager>().AsSingle();
-        
     }
 }

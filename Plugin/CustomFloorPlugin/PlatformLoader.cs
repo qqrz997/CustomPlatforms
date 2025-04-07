@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 using AssetBundleLoadingTools.Utilities;
-
+using BeatSaberMarkupLanguage;
 using JetBrains.Annotations;
 
 using SiraUtil.Logging;
@@ -56,18 +56,15 @@ public class PlatformLoader
     /// </summary>
     private async Task<CustomPlatform?> LoadPlatformFromFileAsyncCore(string fullPath)
     {
-        byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
-
-        AssetBundle? assetBundle = await AssetBundleExtensions.LoadFromMemoryAsync(bundleData);
-
+        var bundleBytes = await File.ReadAllBytesAsync(fullPath);
+        var assetBundle = await AssetBundleExtensions.LoadFromMemoryAsync(bundleBytes);
         if (assetBundle == null)
         {
             _siraLog.Error($"File could not be loaded:{Environment.NewLine}{fullPath}");
             return null;
         }
 
-        GameObject? platformPrefab = await AssetBundleExtensions.LoadAssetAsync<GameObject>(assetBundle, "_CustomPlatform");
-
+        var platformPrefab = await AssetBundleExtensions.LoadAssetAsync<GameObject>(assetBundle, "_CustomPlatform");
         if (platformPrefab == null)
         {
             assetBundle.Unload(true);
@@ -79,8 +76,7 @@ public class PlatformLoader
 
         await RepairPlatformShadersAsync(platformPrefab);
 
-        CustomPlatform? customPlatform = platformPrefab.GetComponent<CustomPlatform>();
-
+        var customPlatform = platformPrefab.GetComponent<CustomPlatform>();
         if (customPlatform == null)
         {
             // Check for old platform
@@ -102,15 +98,14 @@ public class PlatformLoader
             UnityEngine.Object.Destroy(legacyPlatform);
         }
 
-        Camera[] cameras = platformPrefab.GetComponentsInChildren<Camera>(true);
-        foreach (Camera camera in cameras)
+        foreach (var camera in platformPrefab.GetComponentsInChildren<Camera>(true))
         {
-            BloomPrePass bloomPrePass = camera.gameObject.AddComponent<BloomPrePass>();
+            var bloomPrePass = camera.gameObject.AddComponent<BloomPrePass>();
             bloomPrePass._bloomPrepassRenderer = _bloomPrepassRenderer;
             bloomPrePass._bloomPrePassEffectContainer = _bloomPrePassEffectContainer;
         }
 
-        customPlatform.platHash = await Task.Run(() => ComputeHash(bundleData));
+        customPlatform.platHash = await Task.Run(() => ComputeHash(bundleBytes));
         customPlatform.fullPath = fullPath;
         customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
 
@@ -122,9 +117,9 @@ public class PlatformLoader
     /// </summary>
     private static string ComputeHash(byte[] data)
     {
-        using MD5 md5 = MD5.Create();
-        byte[] hash = md5.ComputeHash(data);
-        return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+        using var md5 = MD5.Create();
+        var hashBytes = md5.ComputeHash(data);
+        return BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
     }
 
     /// <summary>
@@ -132,13 +127,12 @@ public class PlatformLoader
     /// </summary>
     private async Task RepairPlatformShadersAsync(GameObject platformPrefab)
     {
-        List<Material> materials = ShaderRepair.GetMaterialsFromGameObjectRenderers(platformPrefab);
-
+        var materials = ShaderRepair.GetMaterialsFromGameObjectRenderers(platformPrefab);
         var replacementInfo = await ShaderRepair.FixShadersOnMaterialsAsync(materials);
 
         if (!replacementInfo.AllShadersReplaced)
         {
-            _siraLog.Warn($"Missing shader replacement data:");
+            _siraLog.Warn("Missing shader replacement data:");
             foreach (var shaderName in replacementInfo.MissingShaderNames)
             {
                 _siraLog.Warn($"\t- {shaderName}");
