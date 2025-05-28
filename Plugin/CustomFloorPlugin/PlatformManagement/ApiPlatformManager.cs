@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Helpers;
 using Newtonsoft.Json;
 using SiraUtil.Logging;
@@ -16,17 +17,20 @@ namespace CustomFloorPlugin.PlatformManagement;
 internal class ApiPlatformManager : IInitializable, IDisposable
 {
     private readonly SiraLog _siraLog;
+    private readonly PluginConfig _pluginConfig;
     private readonly IHttpService _httpService;
     private readonly LevelCollectionViewController _levelCollectionViewController;
     private readonly PlatformManager _platformManager;
 
     public ApiPlatformManager(
         SiraLog siraLog,
+        PluginConfig pluginConfig,
         IHttpService httpService,
         LevelCollectionViewController levelCollectionViewController,
         PlatformManager platformManager)
     {
         _siraLog = siraLog;
+        _pluginConfig = pluginConfig;
         _httpService = httpService;
         _levelCollectionViewController = levelCollectionViewController;
         _platformManager = platformManager;
@@ -48,10 +52,8 @@ internal class ApiPlatformManager : IInitializable, IDisposable
     
     private async void OnLevelSelected(LevelCollectionViewController levelCollectionViewController, BeatmapLevel beatmapLevel)
     {
-        // todo: add a config setting to disable custom song custom platforms
         _platformManager.APIRequestedPlatform = null;
-        
-        if (beatmapLevel.hasPrecalculatedData)
+        if (!_pluginConfig.CustomSongPlatforms || beatmapLevel.hasPrecalculatedData)
         {
             return;
         }
