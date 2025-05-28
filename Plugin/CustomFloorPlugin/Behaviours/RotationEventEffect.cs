@@ -42,8 +42,7 @@ public class RotationEventEffect : MonoBehaviour, INotifyPlatformEnabled, INotif
             _lightRotationEventEffect._event = (BasicBeatmapEventType)eventType;
             _lightRotationEventEffect._rotationVector = rotationVector;
             _lightRotationEventEffect._transform = transform;
-            _lightRotationEventEffect.SetField("_audioTimeSource", _audioTimeSource);
-            _lightRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
+            container.Inject(_lightRotationEventEffect);
         }
         else if (_beatmapCallbacksController is not null)
         {
