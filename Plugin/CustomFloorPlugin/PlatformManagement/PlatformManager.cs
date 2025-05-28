@@ -102,6 +102,10 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
     {
         if (platform == ActivePlatform)
         {
+            foreach (var notifyEnable in ActivePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
+            {
+                notifyEnable.PlatformEnabled(container);
+            }
             return ActivePlatform;
         }
 
