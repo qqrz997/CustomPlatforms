@@ -1,41 +1,44 @@
-﻿<vertical child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+﻿<horizontal xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd"
+            vertical-fit="Unconstrained" horizontal-fit="Unconstrained">
+    
+    <!-- Settings -->
+    <vertical>
+        <vertical horizontal-fit="PreferredSize" pref-width="50" spacing="2" child-control-height="false" child-expand-height="false">
+            
+            <vertical bg="panel-top" horizontal-fit="PreferredSize" pref-width="34" size-delta-y="10">
+                <text text="Settings" font-size="7" font-align="Capline" italics="true"/>
+            </vertical>
+            
+            <vertical bg="round-rect-panel" horizontal-fit="Unconstrained" child-control-height="false" child-expand-height="false">
+                <toggle-setting value="Enabled" text="Enabled" apply-on-change="true"/>
+                <toggle-setting value="CustomSongPlatforms" text="Custom Song Platforms" apply-on-change="true"/>
+            </vertical>
+            
+        </vertical>
+    </vertical>
+    
+    <!-- Platform tabs and lists -->
+    <vertical horizontal-fit="PreferredSize" pref-width="90" spacing="2" child-control-height="true" child-expand-height="true">
+        <horizontal pref-height="10">
+            <tab-selector page-count="4" tab-tag="platform-lists" select-cell="select-tab" 
+                          hover-hint="Select different platforms for each game mode"
+                          child-expand-width="true" child-control-width="true"/>
+        </horizontal>
 
-  <horizontal pref-width="100" pref-height="10">
-    <tab-selector page-count="4" tab-tag="platform-lists" select-cell="select-tab" hover-hint="Select different platforms for each game mode" child-expand-width="true" child-control-width="true"/>
-  </horizontal>
+        <horizontal pref-height="60">
+            <tab tab-name="Singleplayer" tags="platform-lists">
+                <list id="singleplayer-platforms-list" select-cell="select-platform" cell-size="10" show-scrollbar="true"/>
+            </tab>
+            <tab tab-name="Multiplayer" tags="platform-lists">
+                <list id="multiplayer-platforms-list" select-cell="select-platform" cell-size="10" show-scrollbar="true"/>
+            </tab>
+            <tab tab-name="360°" tags="platform-lists">
+                <list id="a360-platforms-list" select-cell="select-platform" cell-size="10" show-scrollbar="true"/>
+            </tab>
+            <tab tab-name="Menu" tags="platform-lists">
+                <list id="menu-platforms-list" select-cell="select-platform" cell-size="10" show-scrollbar="true"/>
+            </tab>
+        </horizontal>
+    </vertical>
 
-  <horizontal pref-width="100" pref-height="72">
-    <tab tab-name="Singleplayer" tags="platform-lists" hover-hint="Select which platform is used in singleplayer and the menu" size-delta-x="25">
-      <vertical pref-width="65" pref-height="72">
-        <page-button click-event="singleplayer-platforms-list#PageUp" direction="Up"/>
-        <list id="singleplayer-platforms-list" expand-cell="true" select-cell="select-platform"/>
-       <page-button click-event="singleplayer-platforms-list#PageDown" direction="Down"/>
-     </vertical>
-   </tab>
-
-   <tab tab-name="Multiplayer" tags="platform-lists" hover-hint="Select which platform is used in multiplayer" size-delta-x="25">
-     <vertical pref-width="65" pref-height="72">
-       <page-button click-event="multiplayer-platforms-list#PageUp" direction="Up"/>
-        <list id="multiplayer-platforms-list" expand-cell="true" select-cell="select-platform"/>
-        <page-button click-event="multiplayer-platforms-list#PageDown" direction="Down"/>
-      </vertical>
-    </tab>
-
-    <tab tab-name="360°" tags="platform-lists" hover-hint="Select which platform is used in 360°-levels" size-delta-x="25">
-      <vertical pref-width="65" pref-height="72">
-        <page-button click-event="a360-platforms-list#PageUp" direction="Up"/>
-        <list id="a360-platforms-list" expand-cell="true" select-cell="select-platform"/>
-       <page-button click-event="a360-platforms-list#PageDown" direction="Down"/>
-     </vertical>
-   </tab>
-
-    <tab tab-name="Menu" tags="platform-lists" hover-hint="Select which platform is used in the menu" size-delta-x="25">
-      <vertical pref-width="65" pref-height="72">
-        <page-button click-event="menu-platforms-list#PageUp" direction="Up"/>
-        <list id="menu-platforms-list" expand-cell="true" select-cell="select-platform"/>
-        <page-button click-event="menu-platforms-list#PageDown" direction="Down"/>
-      </vertical>
-    </tab>
- </horizontal>
-
-</vertical>
+</horizontal>

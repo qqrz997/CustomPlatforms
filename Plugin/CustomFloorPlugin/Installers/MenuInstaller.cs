@@ -22,7 +22,7 @@ internal class MenuInstaller : Installer
         Container.BindInterfacesTo<PlatformFileUpdater>().AsSingle();
         Container.BindInterfacesTo<ApiPlatformManager>().AsSingle();
         
-        Container.Bind<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
+        Container.Bind<PlatformListsViewController>().FromNewComponentAsViewController().AsSingle();
         Container.Bind<PlatformsFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
         Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
     }

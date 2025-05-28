@@ -11,6 +11,9 @@ namespace CustomFloorPlugin.Configuration;
 [UsedImplicitly]
 public class PluginConfig
 {
+    public virtual bool Enabled { get; set; } = true;
+    public virtual bool CustomSongPlatforms { get; set; } = true;
+    
     public virtual string? SingleplayerPlatformHash { get; set; }
     public virtual string? MultiplayerPlatformHash { get; set; }
     public virtual string? A360PlatformHash { get; set; }

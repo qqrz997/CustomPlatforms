@@ -18,94 +18,27 @@ namespace CustomFloorPlugin.UI;
 /// BSML uses the <see cref="ViewDefinitionAttribute"/> to determine the Layout of the GameObjects and their Components<br/>
 /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
 /// </summary>
+[HotReload(RelativePathToLayout = "./PlatformLists.bsml")]
 [ViewDefinition("CustomFloorPlugin.UI.PlatformLists.bsml")]
-internal class PlatformListsView : BSMLAutomaticViewController
+internal class PlatformListsViewController : BSMLAutomaticViewController
 {
     [Inject] private readonly PluginConfig _config = null!;
     [Inject] private readonly AssetLoader _assetLoader = null!;
     [Inject] private readonly PlatformManager _platformManager = null!;
     [Inject] private readonly IPlatformSpawner _platformSpawner = null!;
 
-    [UIComponent("singleplayer-platforms-list")]
-    private readonly CustomListTableData _singleplayerPlatformListTable = null!;
-
-    [UIComponent("multiplayer-platforms-list")]
-    private readonly CustomListTableData _multiplayerPlatformListTable = null!;
-
-    [UIComponent("a360-platforms-list")]
-    private readonly CustomListTableData _a360PlatformListTable = null!;
-
-    [UIComponent("menu-platforms-list")]
-    private readonly CustomListTableData _menuPlatformListTable = null!;
+    [UIComponent("singleplayer-platforms-list")] private readonly CustomListTableData _singleplayerList = null!;
+    [UIComponent("multiplayer-platforms-list")] private readonly CustomListTableData _multiplayerList = null!;
+    [UIComponent("a360-platforms-list")] private readonly CustomListTableData _circleList = null!;
+    [UIComponent("menu-platforms-list")] private readonly CustomListTableData _menuList = null!;
 
     private CustomListTableData[] _listTables = null!;
     private int _tabIndex;
-
-    /// <summary>
-    /// Called when a tab is selected by the user<br/>
-    /// Changes to the <see cref="CustomPlatform"/> of the selected game mode
-    /// </summary>
-    /// <param name="segmentedControl">Used to gather the cell index</param>
-    /// <param name="_">I love how optimised BSML is</param>
-    [UIAction("select-tab")]
-    public void OnDidSelectTab(SegmentedControl segmentedControl, int _)
-    {
-        _tabIndex = segmentedControl.selectedCellNumber;
-        int index = GetPlatformIndexForTabIndex(_tabIndex);
-        _listTables[segmentedControl.selectedCellNumber].TableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
-        _listTables[segmentedControl.selectedCellNumber].TableView.SelectCellWithIdx(index, true);
-    }
-
-    /// <summary>
-    /// Called when a <see cref="CustomPlatform"/> is selected by the user
-    /// </summary>
-    /// <param name="_">I love how optimised BSML is</param>
-    /// <param name="index">Cell index of the users selection</param>
-    [UIAction("select-platform")]
-    // ReSharper disable once AsyncVoidMethod
-    public async void OnDidSelectPlatform(TableView _, int index)
-    {
-        await _platformSpawner.SpawnPlatform(_platformManager.AllPlatforms[index]);
-        SetPlatformForTabIndex(_tabIndex, _platformManager.AllPlatforms[index]);
-    }
-
-    /// <summary>
-    /// Changing to the current platform when the menu is shown<br/>
-    /// [Called by Beat Saber]
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
-    {
-        base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-        if (firstActivation)
-            _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
-        RefreshListViews();
-        await _platformSpawner.SpawnPlatform(GetPlatformForTabIndex(_tabIndex));
-    }
-
-    /// <summary>
-    /// Swapping back to the standard menu environment or to the selected singleplayer platform when the menu is closed
-    /// [Called by Beat Saber]
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    protected override async void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
-    {
-        base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-        if (removedFromHierarchy)
-            _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
-        int index = GetPlatformIndexForTabIndex(_tabIndex);
-        _listTables[_tabIndex].TableView.SelectCellWithIdx(index);
-        await _platformSpawner.SpawnPlatform(_platformManager.MenuPlatform);
-    }
-
-    /// <summary>
-    /// (Re-)Loading the tables for the ListView of available platforms
-    /// [Called by BSML]
-    /// </summary>
+    
     [UIAction("#post-parse")]
     public void PostParse()
     {
-        _listTables = [_singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable];
+        _listTables = [_singleplayerList, _multiplayerList, _circleList, _menuList];
         for (int i = 0; i < _platformManager.AllPlatforms.Count; i++)
             AddCellForPlatform(_platformManager.AllPlatforms[i], i);
         for (int i = 0; i < _listTables.Length; i++)
@@ -117,10 +50,53 @@ internal class PlatformListsView : BSMLAutomaticViewController
         }
     }
 
-    /// <summary>
-    /// Called when a <see cref="CustomPlatform"/> was added to the list<br/>
-    /// Adds or Removes the corresponding cells and refreshes the UI
-    /// </summary>
+    public bool Enabled
+    {
+        get => _config.Enabled;
+        set => _config.Enabled = value;
+    }
+
+    public bool CustomSongPlatforms
+    {
+        get => _config.CustomSongPlatforms;
+        set => _config.CustomSongPlatforms = value;
+    }
+    
+    [UIAction("select-tab")]
+    public void OnDidSelectTab(SegmentedControl segmentedControl, int _)
+    {
+        _tabIndex = segmentedControl.selectedCellNumber;
+        int index = GetPlatformIndexForTabIndex(_tabIndex);
+        _listTables[segmentedControl.selectedCellNumber].TableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
+        _listTables[segmentedControl.selectedCellNumber].TableView.SelectCellWithIdx(index, true);
+    }
+
+    [UIAction("select-platform")]
+    public async void OnDidSelectPlatform(TableView _, int index)
+    {
+        await _platformSpawner.SpawnPlatform(_platformManager.AllPlatforms[index]);
+        SetPlatformForTabIndex(_tabIndex, _platformManager.AllPlatforms[index]);
+    }
+
+    protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+    {
+        base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+        if (firstActivation)
+            _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
+        RefreshListViews();
+        await _platformSpawner.SpawnPlatform(GetPlatformForTabIndex(_tabIndex));
+    }
+
+    protected override async void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+    {
+        base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+        if (removedFromHierarchy)
+            _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
+        int index = GetPlatformIndexForTabIndex(_tabIndex);
+        _listTables[_tabIndex].TableView.SelectCellWithIdx(index);
+        await _platformSpawner.SpawnPlatform(_platformManager.MenuPlatform);
+    }
+
     private void OnCollectionDidChange(object sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.Action == NotifyCollectionChangedAction.Add)
@@ -137,20 +113,12 @@ internal class PlatformListsView : BSMLAutomaticViewController
         }
     }
 
-    /// <summary>
-    /// Updates all <see cref="CustomListTableData"/>s
-    /// </summary>
     private void RefreshListViews()
     {
         foreach (CustomListTableData t in _listTables)
             t.TableView.ReloadDataKeepingPosition();
     }
 
-    /// <summary>
-    /// Adds a cell to the UI for the given <see cref="CustomPlatform"/>
-    /// </summary>
-    /// <param name="platform">The platform to be added as a cell</param>
-    /// <param name="index">The index the cell should be inserted at</param>
     private void AddCellForPlatform(CustomPlatform platform, int index)
     {
         CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader.FallbackCover);
@@ -158,11 +126,6 @@ internal class PlatformListsView : BSMLAutomaticViewController
             listTable.Data.Insert(index, cell);
     }
 
-    /// <summary>
-    /// Removes the cell from the UI for the given <see cref="CustomPlatform"/>
-    /// </summary>
-    /// <param name="platform">The platform the cell was created for</param>
-    /// <param name="index">The index the cell is located at</param>
     private void RemoveCellForPlatform(CustomPlatform platform, int index)
     {
         foreach (CustomListTableData listTable in _listTables)
@@ -175,7 +138,8 @@ internal class PlatformListsView : BSMLAutomaticViewController
         }
     }
 
-    private int GetPlatformIndexForTabIndex(int tabIndex) => _platformManager.AllPlatforms.IndexOf(GetPlatformForTabIndex(tabIndex));
+    private int GetPlatformIndexForTabIndex(int tabIndex) => 
+        _platformManager.AllPlatforms.IndexOf(GetPlatformForTabIndex(tabIndex));
 
     private CustomPlatform GetPlatformForTabIndex(int tabIndex) => tabIndex switch
     {
