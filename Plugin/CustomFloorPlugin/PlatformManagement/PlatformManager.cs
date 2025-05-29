@@ -18,7 +18,6 @@ using UnityEngine;
 using Zenject;
 using Random = System.Random;
 
-
 namespace CustomFloorPlugin.PlatformManagement;
 
 /// <summary>
@@ -93,36 +92,32 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
 
     public async Task InitializeAsync(CancellationToken token) => await LoadPlatformsAsync(token);
 
-    /// <summary>
-    /// Automatically save the descriptors on exit
-    /// </summary>
+    // Automatically save the descriptors on exit
     public void Dispose() => SavePlatformInfosToFile();
     
     public async Task<CustomPlatform> SpawnPlatform(CustomPlatform platform, DiContainer container)
     {
+        if (!_config.Enabled)
+        {
+            DisablePlatform(ActivePlatform, container);
+            return DefaultPlatform;
+        }
+        
         if (platform == ActivePlatform)
         {
-            foreach (var notifyEnable in ActivePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-            {
-                notifyEnable.PlatformEnabled(container);
-            }
+            EnablePlatform(ActivePlatform, container);
             return ActivePlatform;
         }
 
-        _spawnPlatformTokenSource.Cancel();
-        _spawnPlatformTokenSource.Dispose();
-        _spawnPlatformTokenSource = new();
-
-        // Clean up the previous platform
         if (container.HasBinding<MultiplayerLevelScenesTransitionSetupDataSO>())
         {
             _assetLoader.MultiplayerLightEffects.PlatformDisabled();
         }
-        foreach (var notifyDisable in ActivePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
-        {
-            notifyDisable.PlatformDisabled();
-        }
-        ActivePlatform.gameObject.SetActive(false);
+        DisablePlatform(ActivePlatform, container);
+        
+        _spawnPlatformTokenSource.Cancel();
+        _spawnPlatformTokenSource.Dispose();
+        _spawnPlatformTokenSource = new();
         
         if (platform == RandomPlatform)
         {
@@ -148,14 +143,28 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
         ActivePlatform = platform;
 
         // Spawn the new platform
-        platform.gameObject.SetActive(true);
+        EnablePlatform(platform, container);
         _materialSwapper.ReplaceMaterials(platform.gameObject);
+        
+        return platform;
+    }
+
+    private static void EnablePlatform(CustomPlatform platform, DiContainer container)
+    {
+        platform.gameObject.SetActive(true);
         foreach (var notifyEnable in platform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
         {
             notifyEnable.PlatformEnabled(container);
         }
-        
-        return platform;
+    }
+
+    private static void DisablePlatform(CustomPlatform platform, DiContainer container)
+    {
+        foreach (var notifyDisable in platform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
+        {
+            notifyDisable.PlatformDisabled();
+        }
+        platform.gameObject.SetActive(false);
     }
 
     private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
