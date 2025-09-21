@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CustomFloorPlugin.Helpers;
-using IPA.Loader;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using SiraUtil.Logging;
@@ -22,24 +21,19 @@ internal class ConnectionManager : IInitializable, IDisposable
     private readonly SiraLog _siraLog;
     private readonly PlatformManager _platformManager;
 
-    private readonly bool _isSongCoreInstalled;
-    private readonly bool _isCinemaInstalled;
-
     public ConnectionManager(SiraLog siraLog, PlatformManager platformManager)
     {
         _siraLog = siraLog;
         _platformManager = platformManager;
-        _isSongCoreInstalled = PluginManager.GetPlugin("SongCore") is not null;
-        _isCinemaInstalled = PluginManager.GetPlugin("Cinema") is not null;
     }
 
     public void Initialize()
     {
-        if (_isCinemaInstalled)
+        if (InstalledMods.Cinema)
         {
             InitializeCinemaConnection();
         }
-        if (_isSongCoreInstalled)
+        if (InstalledMods.SongCore)
         {
             InitializeSongCoreConnection();
         }
@@ -47,22 +41,16 @@ internal class ConnectionManager : IInitializable, IDisposable
 
     public void Dispose()
     {
-        if (_isCinemaInstalled)
+        if (InstalledMods.Cinema)
             DisposeCinemaConnection();
-        if (_isSongCoreInstalled)
+        if (InstalledMods.SongCore)
             DisposeSongCoreConnection();
     }
 
     // IMPORTANT !!!
     // Make sure to check SongCore and Cinema respectively are installed before calling the following methods
-    private void InitializeSongCoreConnection()
-    {
-        SongCore.Collections.RegisterCapability("Custom Platforms");
-    }
-    private void DisposeSongCoreConnection()
-    {
-        SongCore.Collections.DeregisterCapability("Custom Platforms");
-    }
+    private void InitializeSongCoreConnection() => SongCore.Collections.RegisterCapability("Custom Platforms");
+    private void DisposeSongCoreConnection() => SongCore.Collections.DeregisterCapability("Custom Platforms");
 
     private void InitializeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
     private void DisposeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;

@@ -40,12 +40,18 @@ internal class ApiPlatformManager : IInitializable, IDisposable
     
     public void Initialize()
     {
-        _levelCollectionViewController.didSelectLevelEvent += OnLevelSelected;
+        if (InstalledMods.SongCore)
+        {
+            _levelCollectionViewController.didSelectLevelEvent += OnLevelSelected;
+        }
     }
 
     public void Dispose()
     {
-        _levelCollectionViewController.didSelectLevelEvent -= OnLevelSelected;
+        if (InstalledMods.SongCore)
+        {
+            _levelCollectionViewController.didSelectLevelEvent -= OnLevelSelected;
+        }
         _downloadPlatformTokenSource.Cancel();
         _downloadPlatformTokenSource.Dispose();
     }
