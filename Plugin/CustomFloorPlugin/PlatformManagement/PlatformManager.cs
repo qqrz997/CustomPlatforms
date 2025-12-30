@@ -30,8 +30,8 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
     private readonly PluginConfig _config;
     private readonly AssetLoader _assetLoader;
     private readonly PlatformLoader _platformLoader;
-    private readonly Random _random;
     private readonly MaterialSwapper _materialSwapper;
+    private readonly Random _random = new();
     
     private readonly Transform _anchor;
     private readonly string _directoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
@@ -72,7 +72,6 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
         PluginConfig config,
         AssetLoader assetLoader,
         PlatformLoader platformLoader,
-        Random random,
         MaterialSwapper materialSwapper,
         [Inject(Id = "CustomPlatforms")] Transform anchor)
     {
@@ -80,7 +79,6 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
         _config = config;
         _assetLoader = assetLoader;
         _platformLoader = platformLoader;
-        _random = random;
         _materialSwapper = materialSwapper;
         _anchor = anchor;
         _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
