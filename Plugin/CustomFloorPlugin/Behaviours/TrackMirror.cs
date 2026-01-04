@@ -10,27 +10,10 @@ namespace CustomFloorPlugin;
 [RequireComponent(typeof(MeshRenderer))]
 public class TrackMirror : MonoBehaviour, INotifyPlatformEnabled
 {
-    public Texture? normalTexture;
-    public Vector2 normalUVScale = Vector2.one;
-    public Vector2 normalUVOffset = Vector2.one;
-    public float bumpIntensity;
-    public bool enableDirt;
-    public Texture? dirtTexture;
-    public Vector2 dirtUVScale = Vector2.one;
-    public Vector2 dirtUVOffset = Vector2.one;
-    public float dirtIntensity;
-    public Color tintColor = Color.white;
-
+    [Inject] private MirrorRendererSO _mirrorRenderer = null!;
+    [Inject] private GameAssets _gameAssets = null!;
+    
     private Mirror? _mirror;
-    private MirrorRendererSO? _mirrorRenderer;
-    private GameShaders? _gameShaders;
-
-    [Inject]
-    private void Construct(MirrorRendererSO mirrorRenderer, GameShaders gameShaders)
-    {
-        _mirrorRenderer = mirrorRenderer;
-        _gameShaders = gameShaders;
-    }
 
     public void PlatformEnabled(DiContainer container)
     {
@@ -38,60 +21,10 @@ public class TrackMirror : MonoBehaviour, INotifyPlatformEnabled
             return;
         container.Inject(this);
         _mirror = gameObject.AddComponent<Mirror>();
+        _mirror._reflectionPlaneTransform = _mirror.transform;
         _mirror._renderer = GetComponent<MeshRenderer>();
         _mirror._mirrorRenderer = Instantiate(_mirrorRenderer);
-        _mirror._mirrorMaterial = CreateMirrorMaterial();
-        _mirror._noMirrorMaterial = CreateNoMirrorMaterial();
+        _mirror._mirrorMaterial = _gameAssets.MirrorMaterial;
+        _mirror._noMirrorMaterial = _gameAssets.NoMirrorMaterial;
     }
-
-    private Material CreateMirrorMaterial()
-    {
-        Material mirrorMaterial = new(_gameShaders?.Mirror);
-        mirrorMaterial.EnableKeyword("ENABLE_MIRROR");
-        mirrorMaterial.EnableKeyword("ETC1_EXTERNAL_ALPHA");
-        mirrorMaterial.EnableKeyword("_EMISSION");
-        mirrorMaterial.SetTexture(_normalTexId, normalTexture);
-        mirrorMaterial.SetTextureScale(_normalTexId, normalUVScale);
-        mirrorMaterial.SetTextureOffset(_normalTexId, normalUVOffset);
-        mirrorMaterial.SetFloat(_bumpIntensityId, bumpIntensity);
-        mirrorMaterial.SetColor(_tintColorId, tintColor);
-        if (!enableDirt) return mirrorMaterial;
-        mirrorMaterial.EnableKeyword("ENABLE_DIRT");
-        mirrorMaterial.SetTexture(_dirtTexId, dirtTexture);
-        mirrorMaterial.SetTextureScale(_dirtTexId, dirtUVScale);
-        mirrorMaterial.SetTextureOffset(_dirtTexId, dirtUVOffset);
-        mirrorMaterial.SetFloat(_dirtIntensityId, dirtIntensity);
-        return mirrorMaterial;
-    }
-
-    private Material CreateNoMirrorMaterial()
-    {
-        Material noMirrorMaterial = new(_gameShaders?.SimpleLit);
-        noMirrorMaterial.EnableKeyword("DIFFUSE");
-        noMirrorMaterial.EnableKeyword("ENABLE_DIFFUSE");
-        noMirrorMaterial.EnableKeyword("ENABLE_FOG");
-        noMirrorMaterial.EnableKeyword("ENABLE_SPECULAR");
-        noMirrorMaterial.EnableKeyword("FOG");
-        noMirrorMaterial.EnableKeyword("NOISE_DITHERING");
-        noMirrorMaterial.EnableKeyword("REFLECTION_PROBE");
-        noMirrorMaterial.EnableKeyword("REFLECTION_PROBE_BOX_PROJECTION");
-        noMirrorMaterial.EnableKeyword("_EMISSION");
-        noMirrorMaterial.EnableKeyword("_ENABLE_FOG_TINT");
-        noMirrorMaterial.EnableKeyword("_RIMLIGHT_NONE");
-        noMirrorMaterial.color = new Color(0.15f, 0.15f, 0.15f, 0f);
-        if (!enableDirt) return noMirrorMaterial;
-        noMirrorMaterial.EnableKeyword("DIRT");
-        noMirrorMaterial.EnableKeyword("ENABLE_DIRT");
-        noMirrorMaterial.SetTexture(_dirtTexId, dirtTexture);
-        noMirrorMaterial.SetTextureScale(_dirtTexId, dirtUVScale);
-        noMirrorMaterial.SetTextureOffset(_dirtTexId, dirtUVOffset);
-        noMirrorMaterial.SetFloat(_dirtIntensityId, dirtIntensity);
-        return noMirrorMaterial;
-    }
-
-    private static readonly int _normalTexId = Shader.PropertyToID("_NormalTex");
-    private static readonly int _bumpIntensityId = Shader.PropertyToID("_BumpIntensity");
-    private static readonly int _dirtTexId = Shader.PropertyToID("_DirtTex");
-    private static readonly int _dirtIntensityId = Shader.PropertyToID("_DirtIntensity");
-    private static readonly int _tintColorId = Shader.PropertyToID("_TintColor");
 }

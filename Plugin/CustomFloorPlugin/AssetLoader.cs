@@ -86,9 +86,6 @@ public class AssetLoader(DiContainer container, Assembly assembly, [Inject(Id = 
         playersPlaceMirrorTransform.localScale = new Vector3(0.1f, 0f, 0.1f);
         playersPlaceMirrorTransform.localPosition = new Vector3(0f, 0.5001f, 0f);
         TrackMirror trackMirror = playersPlaceMirror.AddComponent<TrackMirror>();
-        trackMirror.bumpIntensity = 0.02f;
-        using Stream floorStream = GetEmbeddedResource("CustomFloorPlugin.Assets.Floor.png");
-        trackMirror.normalTexture = floorStream.ReadTexture2D();
         trackMirror.PlatformEnabled(_container);
 
         GameObject playersPlaceFrame = new("Frame");

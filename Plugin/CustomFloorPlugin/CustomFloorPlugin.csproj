@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\FeetIcon.png" />
-    <EmbeddedResource Include="Assets\Floor.png" />
     <EmbeddedResource Include="Assets\LvlInsaneCover.png" />
     <EmbeddedResource Include="Assets\PlayersPlace.mesh" />
     <EmbeddedResource Include="Assets\QuestionMarkIcon.png" />

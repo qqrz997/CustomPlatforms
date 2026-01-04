@@ -41,7 +41,7 @@ internal class AppInstaller : Installer
         Container.BindInstance(_postProcessEnabled).WithId("PostProcessEnabled").AsSingle().IfNotBound();
         Container.BindInstance(new GameObject("CustomPlatforms").transform).WithId("CustomPlatforms").AsSingle();
         Container.Bind<MaterialSwapper>().AsSingle();
-        Container.BindInterfacesAndSelfTo<GameShaders>().AsSingle();
+        Container.BindInterfacesAndSelfTo<GameAssets>().AsSingle();
         
         Container.Bind<AssetLoader>().AsSingle().WithArguments(_assembly);
         Container.Bind<PlatformLoader>().AsSingle();
