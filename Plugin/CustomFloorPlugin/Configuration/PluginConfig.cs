@@ -13,6 +13,7 @@ public class PluginConfig
 {
     public virtual bool Enabled { get; set; } = true;
     public virtual bool CustomSongPlatforms { get; set; } = true;
+    public virtual bool OverrideIncompatibleRequirements { get; set; } = false;
     
     public virtual string? SingleplayerPlatformHash { get; set; }
     public virtual string? MultiplayerPlatformHash { get; set; }

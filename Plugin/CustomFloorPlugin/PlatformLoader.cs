@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 using AssetBundleLoadingTools.Utilities;
-using BeatSaberMarkupLanguage;
 using JetBrains.Annotations;
 
 using SiraUtil.Logging;

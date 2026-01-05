@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Models;
-using SiraUtil.Logging;
 using Zenject;
 
 namespace CustomFloorPlugin.PlatformManagement;
@@ -13,30 +13,44 @@ public sealed class StandardGameplayPlatformSpawner : IPlatformSpawner, IInitial
     private readonly DiContainer _container;
     private readonly IEnvironmentHider _environmentHider;
     private readonly StandardLevelScenesTransitionSetupDataSO _scenesTransitionSetupData;
+    private readonly PluginConfig _config;
 
-    // private readonly SiraLog logger;
-    
     public StandardGameplayPlatformSpawner(
         PlatformManager platformManager,
         DiContainer container,
         IEnvironmentHider environmentHider,
-        StandardLevelScenesTransitionSetupDataSO scenesTransitionSetupData, 
-        SiraLog logger)
+        StandardLevelScenesTransitionSetupDataSO scenesTransitionSetupData,
+        PluginConfig config)
     {
         _platformManager = platformManager;
         _container = container;
         _environmentHider = environmentHider;
         _scenesTransitionSetupData = scenesTransitionSetupData;
-        // this.logger = logger;
+        _config = config;
     }
 
     public async void Initialize()
     {
-        // todo: we cannot re-enable the default env when another mod, like chroma, is in charge of the env
-        // var isNoodle = _scenesTransitionSetupData.beatmapKey.RequiresNoodleExtensions();
+        if (_platformManager.APIRequestedPlatform != null)
+        {
+            await SpawnPlatform(_platformManager.APIRequestedPlatform);
+            return;
+        }
         
-        var currentPlatform = _platformManager.APIRequestedPlatform != null ? _platformManager.APIRequestedPlatform
-            : _scenesTransitionSetupData.HasRotationEvents() ? _platformManager.A360Platform
+        if (!_config.OverrideIncompatibleRequirements)
+        {
+            var hasIncompatibleRequirement = _scenesTransitionSetupData.beatmapKey.RequiresAny(
+                "Noodle Extensions", "Vivify", "Cinema");
+
+            if (hasIncompatibleRequirement)
+            {
+                // Calling SpawnPlatform handles this, but we only want to disable the menu platform in this case
+                _platformManager.MenuPlatform.Disable();
+                return;
+            }
+        }
+        
+        var currentPlatform = _scenesTransitionSetupData.HasRotationEvents() ? _platformManager.A360Platform
             : _platformManager.SingleplayerPlatform;
         
         await SpawnPlatform(currentPlatform);
@@ -45,7 +59,8 @@ public sealed class StandardGameplayPlatformSpawner : IPlatformSpawner, IInitial
     public async void Dispose()
     {
         // Return to the menu platform when the level ends
-        await SpawnPlatform(_platformManager.MenuPlatform);
+        // todo: might want to use an event to hand the responsibility of re-spawning this to MenuPlatformSpawner
+        await _platformManager.SpawnPlatform(_platformManager.MenuPlatform, _container);
     }
 
     public async Task SpawnPlatform(CustomPlatform customPlatform)

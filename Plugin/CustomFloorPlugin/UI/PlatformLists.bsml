@@ -11,7 +11,10 @@
             
             <vertical bg="round-rect-panel" horizontal-fit="Unconstrained" child-control-height="false" child-expand-height="false">
                 <toggle-setting value="Enabled" text="Enabled" apply-on-change="true"/>
-                <toggle-setting value="CustomSongPlatforms" text="Custom Song Platforms" apply-on-change="true"/>
+                <toggle-setting value="CustomSongPlatforms" text="Custom Song Platforms" apply-on-change="true" 
+                                hover-hint="Whether to use the custom platform specified by the mapper" />
+                <toggle-setting value="OverrideIncompatibleRequirements" text="Override Requirements" apply-on-change="true" 
+                                hover-hint="Whether to use custom platforms on maps where they may look incorrect i.e. on Noodle Extensions maps"/>
             </vertical>
             
         </vertical>

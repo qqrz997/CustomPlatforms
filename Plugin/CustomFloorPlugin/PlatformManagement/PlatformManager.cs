@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Helpers;
-using CustomFloorPlugin.Models;
 using IPA.Utilities;
 using JetBrains.Annotations;
 using SiraUtil.Logging;
@@ -97,13 +96,13 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
     {
         if (!_config.Enabled)
         {
-            DisablePlatform(ActivePlatform, container);
+            ActivePlatform.Disable();
             return DefaultPlatform;
         }
         
         if (platform == ActivePlatform)
         {
-            EnablePlatform(ActivePlatform, container);
+            ActivePlatform.Enable(container);
             return ActivePlatform;
         }
 
@@ -111,7 +110,7 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
         {
             _assetLoader.MultiplayerLightEffects.PlatformDisabled();
         }
-        DisablePlatform(ActivePlatform, container);
+        ActivePlatform.Disable();
         
         _spawnPlatformTokenSource.Cancel();
         _spawnPlatformTokenSource.Dispose();
@@ -141,28 +140,10 @@ public sealed class PlatformManager : IAsyncInitializable, IDisposable
         ActivePlatform = platform;
 
         // Spawn the new platform
-        EnablePlatform(platform, container);
+        platform.Enable(container);
         _materialSwapper.ReplaceMaterials(platform.gameObject);
         
         return platform;
-    }
-
-    private static void EnablePlatform(CustomPlatform platform, DiContainer container)
-    {
-        platform.gameObject.SetActive(true);
-        foreach (var notifyEnable in platform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-        {
-            notifyEnable.PlatformEnabled(container);
-        }
-    }
-
-    private static void DisablePlatform(CustomPlatform platform, DiContainer container)
-    {
-        foreach (var notifyDisable in platform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
-        {
-            notifyDisable.PlatformDisabled();
-        }
-        platform.gameObject.SetActive(false);
     }
 
     private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
